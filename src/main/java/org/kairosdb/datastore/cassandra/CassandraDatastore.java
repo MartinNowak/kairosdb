@@ -65,7 +65,7 @@ public class CassandraDatastore implements Datastore
 	public static final DataPointsRowKeySerializer DATA_POINTS_ROW_KEY_SERIALIZER = new DataPointsRowKeySerializer();
 
 
-	public static final long ROW_WIDTH = 1814400000L; //3 Weeks wide
+	public static final long ROW_WIDTH = 365 * 24 * 3600 * 1000L;
 
 	public static final String KEY_QUERY_TIME = "kairosdb.datastore.cassandra.key_query_time";
 
@@ -646,7 +646,7 @@ public class CassandraDatastore implements Datastore
 	@SuppressWarnings("PointlessBitwiseExpression")
 	private static int getColumnName(long rowTime, long timestamp, boolean isInteger)
 	{
-		int ret = (int) (timestamp - rowTime);
+		int ret = (int) ((timestamp - rowTime) / 1000);
 
 		if (isInteger)
 			return ((ret << 1) | LONG_FLAG);
@@ -658,7 +658,7 @@ public class CassandraDatastore implements Datastore
 	@SuppressWarnings("PointlessBitwiseExpression")
 	public static int getColumnName(long rowTime, long timestamp)
 	{
-		int ret = (int) (timestamp - rowTime);
+		int ret = (int) ((timestamp - rowTime) / 1000);
 
 		/*
 			The timestamp is shifted to support legacy datapoints that
@@ -669,7 +669,7 @@ public class CassandraDatastore implements Datastore
 
 	public static long getColumnTimestamp(long rowTime, int columnName)
 	{
-		return (rowTime + (long) (columnName >>> 1));
+		return (rowTime + 1000L * (columnName >>> 1));
 	}
 
 	public static boolean isLongValue(int columnName)
